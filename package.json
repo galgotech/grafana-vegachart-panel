@@ -1,6 +1,6 @@
 {
   "name": "grafana-vegachart-panel",
-  "version": "1.4.0",
+  "version": "0.0.0",
   "description": "Vega chart panel for Grafana",
   "scripts": {
     "build": "grafana-toolkit plugin:build",

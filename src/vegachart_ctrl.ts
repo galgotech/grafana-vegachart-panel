@@ -63,40 +63,39 @@ class VegaChartCtrl extends MetricsPanelCtrl {
       return;
     }
 
-    try {    
+    try {
       let spec = new Function('return (' + this.panel.data + ')')();
       spec = spec();
       spec.data = this.parseRawData(this.rawData);
-      
+
       let view = new vega.View(vega.parse(spec), {
-          renderer: 'svg', // renderer (canvas or svg)
-          container: '.vegachart-panel__chart', // parent DOM container
-          hover: true, // enable hover processing
+        renderer: 'svg', // renderer (canvas or svg)
+        container: '.vegachart-panel__chart', // parent DOM container
+        hover: true, // enable hover processing
       });
       return view.runAsync();
-
     } catch (e) {
       console.log('JSON error', e);
     }
   }
 
   parseRawData(rawData: any) {
-    if (this.rawData.length == 0) {
-        return [];
+    if (this.rawData.length === 0) {
+      return [];
     }
 
     let cols = rawData[0].columns;
     let rows = rawData[0].rows;
     let data: any = [];
-    for (let i in rows ) {
-        let row = rows[i];
-        let d: any = {};
-        for (let j in cols) {
-          d[ cols[j].text ] = row[j];
-        }
-        data.push(d);
+    for (let i in rows) {
+      let row = rows[i];
+      let d: any = {};
+      for (let j in cols) {
+        d[cols[j].text] = row[j];
+      }
+      data.push(d);
     }
-  
+
     var func = new Function('return (' + this.panel.data_format + ')')();
     return func(rawData);
   }
@@ -107,10 +106,9 @@ class VegaChartCtrl extends MetricsPanelCtrl {
     this.data = this.parseRawData(this.rawData);
     this.render(this.data);
   }
-  
+
   link(scope: any, elem: any, attrs: any, ctrl: any) {
-        console.log("link");
-        //rendering(scope, elem, attrs, ctrl);
+    //rendering(scope, elem, attrs, ctrl);
   }
 
   seriesHandler(seriesData: any) {

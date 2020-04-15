@@ -6,8 +6,7 @@ import _ from 'lodash';
 //import rendering from './rendering';
 //import './legend';
 
-import * as vega from  './lib/vega';
-
+import * as vega from './lib/vega';
 
 class VegaChartCtrl extends MetricsPanelCtrl {
   static templateUrl = 'module.html';
@@ -19,10 +18,11 @@ class VegaChartCtrl extends MetricsPanelCtrl {
   constructor($scope: any, $injector: any, $rootScope: any) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
-    
+
     const panelDefaults = {
-      data_format: "function (data) {\n  return data;\n}",
-      data: JSON.stringify({
+      data_format: 'function (data) {\n  return data;\n}',
+      data: JSON.stringify(
+        {
           $schema: 'https://vega.github.io/schema/vega/v5.json',
           width: 400,
           height: 200,
@@ -30,8 +30,11 @@ class VegaChartCtrl extends MetricsPanelCtrl {
           signals: [],
           scales: [],
           axes: [],
-          marks: []
-      }, null, 4)
+          marks: [],
+        },
+        null,
+        4
+      ),
     };
 
     _.defaults(this.panel, panelDefaults);
@@ -56,15 +59,14 @@ class VegaChartCtrl extends MetricsPanelCtrl {
   }
 
   onRender() {
-    if (this.panel.data == '') {
-      return 
+    if (this.panel.data === '') {
+      return;
     }
     try {
       var spec = JSON.parse(this.panel.data);
 
-      
-      this.parseRawData(this.rawData)
-      
+      this.parseRawData(this.rawData);
+
       spec.data = this.parseRawData([
         {
           name: 'table',
@@ -80,20 +82,20 @@ class VegaChartCtrl extends MetricsPanelCtrl {
           ],
         },
       ]);
-      
+
       var view = new vega.View(vega.parse(spec), {
-          renderer: 'svg', // renderer (canvas or svg)
-          container: '.vegachart-panel__chart', // parent DOM container
-          hover: true, // enable hover processing
+        renderer: 'svg', // renderer (canvas or svg)
+        container: '.vegachart-panel__chart', // parent DOM container
+        hover: true, // enable hover processing
       });
       return view.runAsync();
     } catch (e) {
-      console.log("JSON error", e)
+      console.log('JSON error', e);
     }
   }
 
   parseRawData(rawData: any) {
-    var func = eval("(function () { return " + this.panel.data_format + "})()") ;
+    var func = new Function('return (' + this.panel.data_format + ')')();
     return func(rawData);
   }
 

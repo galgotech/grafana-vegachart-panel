@@ -22,7 +22,7 @@ class VegaChartCtrl extends MetricsPanelCtrl {
     
     const panelDefaults = {
       data_format: "function (data) {\n  return data;\n}",
-      data: JSON.stringify({
+      data: "function () {\n\t" + JSON.stringify({
           $schema: 'https://vega.github.io/schema/vega/v5.json',
           width: 400,
           height: 200,
@@ -31,7 +31,7 @@ class VegaChartCtrl extends MetricsPanelCtrl {
           scales: [],
           axes: [],
           marks: []
-      }, null, 4)
+      }, null, 4) + "return data;\n}"
     };
 
     _.defaults(this.panel, panelDefaults);
@@ -59,42 +59,42 @@ class VegaChartCtrl extends MetricsPanelCtrl {
     if (this.panel.data == '') {
       return 
     }
-    try {
-      var spec = JSON.parse(this.panel.data);
 
+    try {    
+      let spec = eval("(function () { return " + this.panel.data + "})()")();
+      spec.data = this.parseRawData(this.rawData);
       
-      this.parseRawData(this.rawData)
-      
-      spec.data = this.parseRawData([
-        {
-          name: 'table',
-          values: [
-            { category: 'A', amount: 28 },
-            { category: 'B', amount: 55 },
-            { category: 'C', amount: 43 },
-            { category: 'D', amount: 91 },
-            { category: 'E', amount: 81 },
-            { category: 'F', amount: 53 },
-            { category: 'G', amount: 19 },
-            { category: 'H', amount: 87 },
-          ],
-        },
-      ]);
-      
-      var view = new vega.View(vega.parse(spec), {
+      let view = new vega.View(vega.parse(spec), {
           renderer: 'svg', // renderer (canvas or svg)
           container: '.vegachart-panel__chart', // parent DOM container
           hover: true, // enable hover processing
       });
       return view.runAsync();
+
     } catch (e) {
       console.log("JSON error", e)
     }
   }
 
   parseRawData(rawData: any) {
+    if (this.rawData.length == 0) {
+        return [];
+    }
+
+    let cols = rawData[0].columns;
+    let rows = rawData[0].rows;
+    let data: any = [];
+    for (let i in rows ) {
+        let row = rows[i];
+        let d: any = {};
+        for (let j in cols) {
+          d[ cols[j].text ] = row[j];
+        }
+        data.push(d);
+    }
+  
     var func = eval("(function () { return " + this.panel.data_format + "})()") ;
-    return func(rawData);
+    return func(data);
   }
 
   onDataReceived(dataList: any) {
@@ -102,6 +102,11 @@ class VegaChartCtrl extends MetricsPanelCtrl {
     //  this.series = dataList.map(this.seriesHandler.bind(this));
     this.data = this.parseRawData(this.rawData);
     this.render(this.data);
+  }
+  
+  link(scope: any, elem: any, attrs: any, ctrl: any) {
+        console.log("link");
+        //rendering(scope, elem, attrs, ctrl);
   }
 
   seriesHandler(seriesData: any) {

@@ -6,8 +6,7 @@ import _ from 'lodash';
 //import rendering from './rendering';
 //import './legend';
 
-import * as vega from  './lib/vega';
-
+import * as vega from './lib/vega';
 
 class VegaChartCtrl extends MetricsPanelCtrl {
   static templateUrl = 'module.html';
@@ -19,10 +18,11 @@ class VegaChartCtrl extends MetricsPanelCtrl {
   constructor($scope: any, $injector: any, $rootScope: any) {
     super($scope, $injector);
     this.$rootScope = $rootScope;
-    
+
     const panelDefaults = {
-      data_format: "function (data) {\n  return data;\n}",
-      data: "function () {\n\t" + JSON.stringify({
+      data_format: 'function (data) {\n  return data;\n}',
+      data: JSON.stringify(
+        {
           $schema: 'https://vega.github.io/schema/vega/v5.json',
           width: 400,
           height: 200,
@@ -30,8 +30,11 @@ class VegaChartCtrl extends MetricsPanelCtrl {
           signals: [],
           scales: [],
           axes: [],
-          marks: []
-      }, null, 4) + "return data;\n}"
+          marks: [],
+        },
+        null,
+        4
+      ),
     };
 
     _.defaults(this.panel, panelDefaults);
@@ -56,12 +59,13 @@ class VegaChartCtrl extends MetricsPanelCtrl {
   }
 
   onRender() {
-    if (this.panel.data == '') {
-      return 
+    if (this.panel.data === '') {
+      return;
     }
 
     try {    
-      let spec = eval("(function () { return " + this.panel.data + "})()")();
+      let spec = new Function('return (' + this.panel.data + ')')();
+      spec = spec();
       spec.data = this.parseRawData(this.rawData);
       
       let view = new vega.View(vega.parse(spec), {
@@ -72,7 +76,7 @@ class VegaChartCtrl extends MetricsPanelCtrl {
       return view.runAsync();
 
     } catch (e) {
-      console.log("JSON error", e)
+      console.log('JSON error', e);
     }
   }
 
@@ -93,8 +97,8 @@ class VegaChartCtrl extends MetricsPanelCtrl {
         data.push(d);
     }
   
-    var func = eval("(function () { return " + this.panel.data_format + "})()") ;
-    return func(data);
+    var func = new Function('return (' + this.panel.data_format + ')')();
+    return func(rawData);
   }
 
   onDataReceived(dataList: any) {

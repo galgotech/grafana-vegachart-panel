@@ -97,7 +97,7 @@ class VegaChartCtrl extends MetricsPanelCtrl {
     }
 
     var func = new Function('return (' + this.panel.data_format + ')')();
-    return func(rawData);
+    return func(data);
   }
 
   onDataReceived(dataList: any) {

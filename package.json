@@ -18,7 +18,7 @@
   "dependencies": {
     "angular": "^1.7.9",
     "jquery": "^3.4.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.19"
   },
   "devDependencies": {
     "@grafana/data": "next",
